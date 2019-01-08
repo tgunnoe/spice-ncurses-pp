@@ -70,8 +70,8 @@ AddressesPanel::AddressesPanel(std::shared_ptr<HD_Wallet> wallet)
         : NCursesMenu (lines(), cols()/2, 0, 0)
 {
 
-    I = new NCursesMenuItem*[lines()+1];
-    for(int i = 0; i!=lines()-1; ++i) {
+    I = new NCursesMenuItem*[lines()];
+    for(int i = 0; i!=lines(); ++i) {
         //whelp std::string to const char* was a goddamn learning
         //experience, c_str doesnt copy
         std::string addr = wallet->displayAddress(i);
@@ -80,13 +80,9 @@ AddressesPanel::AddressesPanel(std::shared_ptr<HD_Wallet> wallet)
         g[addr.size()] = '\0';
         I[i] = new PassiveItem(g);
     }
-    std::string addr = wallet->displayMnemonic();
-    char *g = new char[addr.size() + 1];
-    std::copy(begin(addr), end(addr), g);
-    g[addr.size()] = '\0';
-    I[lines()-1] = new PassiveItem(g);
+    set_format(lines()-2, 1);
 
-    I[lines()] = new NCursesMenuItem();
+    I[lines()-1] = new NCursesMenuItem();
 
     InitMenu(I, TRUE, TRUE);
     box();

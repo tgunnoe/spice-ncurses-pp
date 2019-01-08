@@ -14,9 +14,11 @@ void Application::title()
 int Application::run()
 {
     // TODO: Insert here no wallet logic
-    StartupMenu M(wallet);
-    M();
-
+    while (wallet == nullptr)
+    {
+        StartupMenu M(wallet);
+        M();
+    }
     AddressesPanel W(wallet);
     W();
 
