@@ -23,7 +23,11 @@ bool NewWalletItem::action()
 
     // Back button wont work unless this is false,
     // need to fix
-    return FALSE;
+    if(p_submenu->prev_menu()->getWalletPtr() != nullptr)
+        return TRUE;
+    else
+        return FALSE;
+
 }
 bool BackItem::action()
 {
