@@ -23,7 +23,7 @@ bool NewWalletItem::action()
 
     // Back button wont work unless this is false,
     // need to fix
-    return TRUE;
+    return FALSE;
 }
 bool BackItem::action()
 {
@@ -33,7 +33,7 @@ bool BackItem::action()
 }
 bool AcceptItem::action()
 {
-    // Fix this, this is crazy. almost looks like lisp..
+    // Fix this crazy spaghetti. almost looks like lisp..
     p_submenu->prev_menu()->getWalletPtr() =
             std::make_shared<HD_Wallet>(
                 bc::split( p_submenu->getTempWallet().displayMnemonic()) );
