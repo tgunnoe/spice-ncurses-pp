@@ -21,6 +21,7 @@ int Application::run()
         AddressesPanel W(wallet);
         W();
     }
+    endwin();
     return 0;
 }
 

@@ -19,6 +19,7 @@ bool NewWalletItem::action()
 {
     p_submenu->prev_menu()->hide();
     p_submenu->boldframe("Keep?");
+    p_submenu->set_mark(">");
     (*p_submenu)();
 
     // Back button wont work unless this is false,
@@ -27,6 +28,42 @@ bool NewWalletItem::action()
         return TRUE;
     else
         return FALSE;
+
+}
+
+bool ImportWalletAction::action()
+{
+    ImportWalletForm F;
+    F();
+    return TRUE;
+}
+ImportWalletForm::ImportWalletForm()
+    : NCursesForm( (lines() - 10)/2, cols()-10, 2, 2 ),
+      F(0),
+      aft(0)
+{
+    aft = new Alpha_Field(8);
+
+    F = new NCursesFormField*[13];
+    F[0]  = new NCursesFormField(1, 8, 1, 1);
+    F[1]  = new NCursesFormField(1, 8, 1, 11);
+    F[2]  = new NCursesFormField(1, 8, 1, 21);
+    F[3]  = new NCursesFormField(1, 8, 1, 31);
+    F[4]  = new NCursesFormField(1, 8, 1, 41);
+    F[5]  = new NCursesFormField(1, 8, 1, 51);
+    F[6]  = new NCursesFormField(1, 8, 3, 1);
+    F[7]  = new NCursesFormField(1, 8, 3, 11);
+    F[8]  = new NCursesFormField(1, 8, 3, 21);
+    F[9]  = new NCursesFormField(1, 8, 3, 31);
+    F[10]  = new NCursesFormField(1, 8, 3, 41);
+    F[11]  = new NCursesFormField(1, 8, 3, 51);
+    F[12]  = new NCursesFormField();
+
+    InitForm(F, TRUE, TRUE);
+    box();
+
+    for(int i = 0; i != 12; i++)
+        F[i]->set_fieldtype(*aft);
 
 }
 bool BackItem::action()
@@ -59,16 +96,16 @@ StartupMenu::StartupMenu(std::shared_ptr<HD_Wallet>& wallet)
         : NCursesMenu (6, 25, (lines()-5)/2, (cols()-23)/2),
           p_menu(this), p_wallet(wallet)
 {
-
     I = new NCursesMenuItem*[4];
     I[0] = new NewWalletItem("Generate Wallet", p_menu);
-    I[1] = new PassiveItem("Import Wallet");
+    I[1] = new ImportWalletAction("Import Wallet");
     I[2] = new QuitItem();
     I[3] = new NCursesMenuItem();
 
     InitMenu(I, TRUE, TRUE);
 
     boldframe("Start Wizard");
+    set_mark(">");
 }
 AddressesPanel::AddressesPanel(std::shared_ptr<HD_Wallet> wallet)
         : NCursesMenu (lines(), cols()/2, 0, 0)

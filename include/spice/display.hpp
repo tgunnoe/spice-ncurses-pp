@@ -122,6 +122,21 @@ class NewWalletItem : public NCursesMenuItem
     bool action();
 
 };
+class ImportWalletForm : public NCursesForm
+{
+  private:
+    NCursesFormField** F;
+    Alpha_Field *aft;
+  public:
+    ImportWalletForm();
+};
+class ImportWalletAction : public NCursesMenuItem
+{
+  public:
+    ImportWalletAction(const char *s) : NCursesMenuItem(s) {}
+    bool action();
+};
+
 class AcceptItem : public NCursesMenuItem
 {
   private:
