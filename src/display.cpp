@@ -1,12 +1,5 @@
 #include <spice/display.hpp>
 
-MenuItems::~MenuItems()
-{
-    typedef std::vector<NCursesMenuItem *>::const_iterator it;
-    for (it i = V_.begin(); i != V_.end(); ++i) {
-        delete *i;
-    }
-}
 NewWalletItem::NewWalletItem(const char* s,
                              const std::shared_ptr<StartupMenu> prev)
         : NCursesMenuItem(s),
@@ -44,27 +37,24 @@ ImportWalletAction::ImportWalletAction(const char* s,
     //is having this local going to bite me?
     Alpha_Field* aft = new Alpha_Field(5);
 
-    F = new NCursesFormField*[13];
-    F[0]  = new NCursesFormField(1, 8, 1, 1);
-    F[1]  = new NCursesFormField(1, 8, 1, 11);
-    F[2]  = new NCursesFormField(1, 8, 1, 21);
-    F[3]  = new NCursesFormField(1, 8, 1, 31);
-    F[4]  = new NCursesFormField(1, 8, 1, 41);
-    F[5]  = new NCursesFormField(1, 8, 1, 51);
-    F[6]  = new NCursesFormField(1, 8, 3, 1);
-    F[7]  = new NCursesFormField(1, 8, 3, 11);
-    F[8]  = new NCursesFormField(1, 8, 3, 21);
-    F[9]  = new NCursesFormField(1, 8, 3, 31);
-    F[10]  = new NCursesFormField(1, 8, 3, 41);
-    F[11]  = new NCursesFormField(1, 8, 3, 51);
-    F[12]  = new NCursesFormField();
+    V_.reserve(13U);
 
-    p_submenu->init_form(F, TRUE, TRUE);
+    for (auto i = 0, x = 1, y = 1; i != 12; ++i, y += 10)
+    {
+        if( i == 6 ) {
+            x = 3;
+            y = 1;
+        }
+        V_.push_back( new NCursesFormField(1, 8, x, y) );
+    }
+    V_.push_back( new NCursesFormField() );
+
+    p_submenu->init_form(&V_[0], true, false);
     p_submenu->box();
     //p_submenu->mvwin( (p_submenu->lines()-5)/2,
     //                  (p_submenu->cols()-2) );
-    for(int i = 0; i != 12; i++)
-        F[i]->set_fieldtype(*aft);
+    for(auto beg = V_.begin(); beg != V_.end(); ++beg)
+        (*beg)->set_fieldtype(*aft);
 }
 bool ImportWalletAction::action()
 {
@@ -135,8 +125,8 @@ StartupMenu::StartupMenu(std::shared_ptr<HD_Wallet>& wallet)
 AddressesPanel::AddressesPanel(std::shared_ptr<HD_Wallet> wallet)
         : NCursesMenu (lines(), cols()/2, 0, 0)
 {
+    V_.reserve(lines());
 
-    I = new NCursesMenuItem*[lines()];
     for(int i = 0; i!=lines(); ++i) {
         //whelp std::string to const char* was a goddamn learning
         //experience, c_str doesnt copy
@@ -144,12 +134,11 @@ AddressesPanel::AddressesPanel(std::shared_ptr<HD_Wallet> wallet)
         char *g = new char[addr.size() + 1];
         std::copy(begin(addr), end(addr), g);
         g[addr.size()] = '\0';
-        I[i] = new PassiveItem(g);
+        V_.push_back(new PassiveItem(g));
     }
     set_format(lines()-2, 1);
+    V_.push_back(new NCursesMenuItem());
 
-    I[lines()-1] = new NCursesMenuItem();
-
-    InitMenu(I, TRUE, TRUE);
+    InitMenu(&V_[0], true, false);
     box();
 }

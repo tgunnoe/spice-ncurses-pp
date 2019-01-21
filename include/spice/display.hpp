@@ -8,12 +8,16 @@
 #include "cursesm.h"
 #include "cursesf.h"
 
-class MenuItems
+template<class T> class ItemsList
 {
 protected:
-    std::vector<NCursesMenuItem*> V_;
-    ~MenuItems();
-
+    std::vector<T *> V_;
+    ~ItemsList() {
+        using it = typename std::vector<T *>::const_iterator;
+        for (it i = V_.begin(); i != V_.end(); ++i) {
+            delete *i;
+        }
+    }
 };
 class QuitItem : public NCursesMenuItem
 {
@@ -38,7 +42,9 @@ template<class T> class SubMenuItem : public NCursesUserItem<T>
   public:
     SubMenuItem (const char* p_name,
                   std::shared_ptr<T> curr_menu)
-            : NCursesUserItem<T>(p_name, static_cast<const char*>(0), curr_menu) {}
+            : NCursesUserItem<T>(p_name,
+                                 static_cast<const char*>(0),
+                                 curr_menu) {}
     virtual ~SubMenuItem() {}
     bool action() {
         //NCursesUserItem<T>::UserData()->prev_menu()->unpost();
@@ -73,7 +79,7 @@ template<class T> class SubMenu : public NCursesMenu
     }
 };
 
-class StartupMenu : private MenuItems, public NCursesMenu
+class StartupMenu : private ItemsList<NCursesMenuItem>, public NCursesMenu
 {
   private:
     std::shared_ptr<StartupMenu> p_menu;
@@ -117,7 +123,7 @@ class BackItem : public NCursesMenuItem
     bool action();
 };
 
-class NewWalletItem : private MenuItems, public NCursesMenuItem
+class NewWalletItem : private ItemsList<NCursesMenuItem>, public NCursesMenuItem
 {
   private:
     std::shared_ptr<NewWalletMenu> p_submenu;
@@ -144,11 +150,10 @@ class ImportWalletForm : public NCursesForm
     }
 };
 
-class ImportWalletAction : public NCursesMenuItem
+class ImportWalletAction : private ItemsList<NCursesFormField>, public NCursesMenuItem
 {
   private:
     std::shared_ptr<ImportWalletForm> p_submenu;
-    NCursesFormField** F;
   public:
     ImportWalletAction(const char *s,
                        const std::shared_ptr<StartupMenu> prev);
@@ -168,10 +173,8 @@ class AcceptItem : public NCursesMenuItem
 
 };
 
-class AddressesPanel : public NCursesMenu
+class AddressesPanel : private ItemsList<NCursesMenuItem>, public NCursesMenu
 {
-  private:
-    NCursesMenuItem** I;
   public:
     AddressesPanel(std::shared_ptr<HD_Wallet> wallet);
 };
