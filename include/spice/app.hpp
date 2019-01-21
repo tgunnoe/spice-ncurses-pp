@@ -4,7 +4,8 @@
 #include <memory>
 #include <iostream>
 #include <cursesapp.h>
-#include <spice/display.hpp>
+#include <spice/startup.hpp>
+#include <spice/mainWindow.hpp>
 #include <spice/HD_Wallet.hpp>
 
 namespace spice {

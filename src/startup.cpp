@@ -1,5 +1,8 @@
-#include <spice/display.hpp>
+#include <spice/startup.hpp>
 
+////////////////////////////////////////////////////////
+// Menu Items //////////////////////////////////////////
+////////////////////////////////////////////////////////
 NewWalletItem::NewWalletItem(const char* s,
                              const std::shared_ptr<StartupMenu> prev)
         : NCursesMenuItem(s),
@@ -29,7 +32,7 @@ bool NewWalletItem::action()
     else
         return FALSE;
 }
-ImportWalletAction::ImportWalletAction(const char* s,
+ImportWalletItem::ImportWalletItem(const char* s,
                                        const std::shared_ptr<StartupMenu> prev)
     : NCursesMenuItem(s),
       p_submenu(std::make_shared<ImportWalletForm>(6, 80))
@@ -50,33 +53,19 @@ ImportWalletAction::ImportWalletAction(const char* s,
     V_.push_back( new NCursesFormField() );
 
     p_submenu->init_form(&V_[0], true, false);
-    p_submenu->box();
+
     //p_submenu->mvwin( (p_submenu->lines()-5)/2,
     //                  (p_submenu->cols()-2) );
     for(auto beg = V_.begin(); beg != V_.end(); ++beg)
         (*beg)->set_fieldtype(*aft);
 }
-bool ImportWalletAction::action()
+bool ImportWalletItem::action()
 {
     //p_submenu->prev_menu()->hide();
-
+    p_submenu->box();
     (*p_submenu)();
-    //ImportWalletForm F;
-    //F();
-    return TRUE;
-}
 
-int ImportWalletForm::virtualize(int c)
-{
-    switch (c) {
-    case '\t':
-        return REQ_NEXT_FIELD;
-    case 127:
-        //driver(REQ_PREV_CHAR);
-        return REQ_DEL_PREV;
-    // Pass the rest of the keys to predefined handler.
-    default: return NCursesForm::virtualize(c);
-    }
+    return TRUE;
 }
 bool BackItem::action()
 {
@@ -92,6 +81,21 @@ bool AcceptItem::action()
                 bc::split( p_submenu->getTempWallet().displayMnemonic()) );
 
     return TRUE;
+}
+////////////////////////////////////////////////////////
+// Menus ///////////////////////////////////////////////
+////////////////////////////////////////////////////////
+int ImportWalletForm::virtualize(int c)
+{
+    switch (c) {
+    case '\t':
+        return REQ_NEXT_FIELD;
+    case 127:
+        //driver(REQ_PREV_CHAR);
+        return REQ_DEL_PREV;
+    // Pass the rest of the keys to predefined handler.
+    default: return NCursesForm::virtualize(c);
+    }
 }
 void NewWalletMenu::On_Menu_Init()
 {
@@ -112,7 +116,7 @@ StartupMenu::StartupMenu(std::shared_ptr<HD_Wallet>& wallet)
     V_.reserve(4U);
     V_ = {
         new NewWalletItem("Generate Wallet", p_menu),
-        new ImportWalletAction("Import Wallet", p_menu),
+        new ImportWalletItem("Import Wallet", p_menu),
         new QuitItem(),
         new NCursesMenuItem()
     };
@@ -122,23 +126,5 @@ StartupMenu::StartupMenu(std::shared_ptr<HD_Wallet>& wallet)
     boldframe("Start Wizard");
     set_mark(">");
 }
-AddressesPanel::AddressesPanel(std::shared_ptr<HD_Wallet> wallet)
-        : NCursesMenu (lines(), cols()/2, 0, 0)
-{
-    V_.reserve(lines());
 
-    for(int i = 0; i!=lines(); ++i) {
-        //whelp std::string to const char* was a goddamn learning
-        //experience, c_str doesnt copy
-        std::string addr = wallet->displayAddress(i);
-        char *g = new char[addr.size() + 1];
-        std::copy(begin(addr), end(addr), g);
-        g[addr.size()] = '\0';
-        V_.push_back(new PassiveItem(g));
-    }
-    set_format(lines()-2, 1);
-    V_.push_back(new NCursesMenuItem());
-
-    InitMenu(&V_[0], true, false);
-    box();
-}
+// Needs a separate file

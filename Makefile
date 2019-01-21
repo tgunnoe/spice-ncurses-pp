@@ -1,6 +1,6 @@
 ## file Makefile
 CXX= g++
-CXXSOURCES= main.cpp src/app.cpp src/display.cpp src/HD_Wallet.cpp
+CXXSOURCES= main.cpp src/app.cpp src/startup.cpp src/mainWindow.cpp src/HD_Wallet.cpp
 CXXOBJECTS= $(patsubst %.cpp, %.o, $(CXXSOURCES))
 OPTIMFLAGS= -g -O
 PACKAGES= libbitcoin libbitcoin-client
@@ -17,5 +17,5 @@ spice: $(CXXOBJECTS)
 $(CXXOBJECTS): include/spice/*.hpp
 
 clean:
-	$(RM) *.o *.so *.orig *~ spice core* *.hh.gch
+	$(RM) src/*.o *.o *.so *.orig *~ spice core* *.hh.gch
 ## eof Makefile
