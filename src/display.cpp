@@ -1,17 +1,26 @@
 #include <spice/display.hpp>
 
+MenuItems::~MenuItems()
+{
+    typedef std::vector<NCursesMenuItem *>::const_iterator it;
+    for (it i = V_.begin(); i != V_.end(); ++i) {
+        delete *i;
+    }
+}
 NewWalletItem::NewWalletItem(const char* s,
                              const std::shared_ptr<StartupMenu> prev)
         : NCursesMenuItem(s),
           p_submenu(std::make_shared<NewWalletMenu>(6, 25, prev))
 {
-    I = new NCursesMenuItem*[4];
-    I[0] = new AcceptItem("Keep Wallet", p_submenu);
-    I[1] = new PassiveItem("Regenerate");
-    I[2] = new BackItem(p_submenu);
-    I[3] = new NCursesMenuItem();
+    V_.reserve(4U);
+    V_ = {
+        new AcceptItem("Keep Wallet", p_submenu),
+        new PassiveItem("Regenerate"),
+        new BackItem(p_submenu),
+        new NCursesMenuItem()
+    };
 
-    p_submenu->init_menu(I, TRUE, TRUE);
+    p_submenu->init_menu(&V_[0], true, false);
     p_submenu->mvwin( (p_submenu->lines()-5)/2,
                       (p_submenu->cols()-23)/2 );
 }
@@ -22,27 +31,18 @@ bool NewWalletItem::action()
     p_submenu->set_mark(">");
     (*p_submenu)();
 
-    // Back button wont work unless this is false,
-    // need to fix
     if(p_submenu->prev_menu()->getWalletPtr() != nullptr)
         return TRUE;
     else
         return FALSE;
-
 }
-
-bool ImportWalletAction::action()
+ImportWalletAction::ImportWalletAction(const char* s,
+                                       const std::shared_ptr<StartupMenu> prev)
+    : NCursesMenuItem(s),
+      p_submenu(std::make_shared<ImportWalletForm>(6, 80))
 {
-    ImportWalletForm F;
-    F();
-    return TRUE;
-}
-ImportWalletForm::ImportWalletForm()
-    : NCursesForm( (lines() - 10)/2, cols()-10, 2, 2 ),
-      F(0),
-      aft(0)
-{
-    aft = new Alpha_Field(8);
+    //is having this local going to bite me?
+    Alpha_Field* aft = new Alpha_Field(5);
 
     F = new NCursesFormField*[13];
     F[0]  = new NCursesFormField(1, 8, 1, 1);
@@ -59,12 +59,34 @@ ImportWalletForm::ImportWalletForm()
     F[11]  = new NCursesFormField(1, 8, 3, 51);
     F[12]  = new NCursesFormField();
 
-    InitForm(F, TRUE, TRUE);
-    box();
-
+    p_submenu->init_form(F, TRUE, TRUE);
+    p_submenu->box();
+    //p_submenu->mvwin( (p_submenu->lines()-5)/2,
+    //                  (p_submenu->cols()-2) );
     for(int i = 0; i != 12; i++)
         F[i]->set_fieldtype(*aft);
+}
+bool ImportWalletAction::action()
+{
+    //p_submenu->prev_menu()->hide();
 
+    (*p_submenu)();
+    //ImportWalletForm F;
+    //F();
+    return TRUE;
+}
+
+int ImportWalletForm::virtualize(int c)
+{
+    switch (c) {
+    case '\t':
+        return REQ_NEXT_FIELD;
+    case 127:
+        //driver(REQ_PREV_CHAR);
+        return REQ_DEL_PREV;
+    // Pass the rest of the keys to predefined handler.
+    default: return NCursesForm::virtualize(c);
+    }
 }
 bool BackItem::action()
 {
@@ -94,15 +116,18 @@ void NewWalletMenu::On_Menu_Termination()
 }
 StartupMenu::StartupMenu(std::shared_ptr<HD_Wallet>& wallet)
         : NCursesMenu (6, 25, (lines()-5)/2, (cols()-23)/2),
-          p_menu(this), p_wallet(wallet)
+          p_menu(this),
+          p_wallet(wallet)
 {
-    I = new NCursesMenuItem*[4];
-    I[0] = new NewWalletItem("Generate Wallet", p_menu);
-    I[1] = new ImportWalletAction("Import Wallet");
-    I[2] = new QuitItem();
-    I[3] = new NCursesMenuItem();
+    V_.reserve(4U);
+    V_ = {
+        new NewWalletItem("Generate Wallet", p_menu),
+        new ImportWalletAction("Import Wallet", p_menu),
+        new QuitItem(),
+        new NCursesMenuItem()
+    };
 
-    InitMenu(I, TRUE, TRUE);
+    InitMenu(&V_[0], true, false);
 
     boldframe("Start Wizard");
     set_mark(">");

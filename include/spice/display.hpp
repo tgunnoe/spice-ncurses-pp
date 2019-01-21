@@ -2,11 +2,19 @@
 #define SPICE_DISPLAY_H
 
 #include <spice/HD_Wallet.hpp>
+#include <vector>
 #include <memory>
 #include <iostream>
 #include "cursesm.h"
 #include "cursesf.h"
 
+class MenuItems
+{
+protected:
+    std::vector<NCursesMenuItem*> V_;
+    ~MenuItems();
+
+};
 class QuitItem : public NCursesMenuItem
 {
   public:
@@ -30,8 +38,7 @@ template<class T> class SubMenuItem : public NCursesUserItem<T>
   public:
     SubMenuItem (const char* p_name,
                   std::shared_ptr<T> curr_menu)
-            : NCursesUserItem<T>(p_name, static_cast<const char*>(0), curr_menu)
-    {}
+            : NCursesUserItem<T>(p_name, static_cast<const char*>(0), curr_menu) {}
     virtual ~SubMenuItem() {}
     bool action() {
         //NCursesUserItem<T>::UserData()->prev_menu()->unpost();
@@ -66,10 +73,9 @@ template<class T> class SubMenu : public NCursesMenu
     }
 };
 
-class StartupMenu : public NCursesMenu
+class StartupMenu : private MenuItems, public NCursesMenu
 {
   private:
-    NCursesMenuItem** I;
     std::shared_ptr<StartupMenu> p_menu;
     std::shared_ptr<HD_Wallet>& p_wallet;
   public:
@@ -111,10 +117,9 @@ class BackItem : public NCursesMenuItem
     bool action();
 };
 
-class NewWalletItem : public NCursesMenuItem
+class NewWalletItem : private MenuItems, public NCursesMenuItem
 {
   private:
-    NCursesMenuItem** I;
     std::shared_ptr<NewWalletMenu> p_submenu;
   public:
     NewWalletItem(const char* s,
@@ -122,18 +127,31 @@ class NewWalletItem : public NCursesMenuItem
     bool action();
 
 };
+
 class ImportWalletForm : public NCursesForm
 {
   private:
     NCursesFormField** F;
-    Alpha_Field *aft;
   public:
-    ImportWalletForm();
+    ImportWalletForm(int nlines, int ncols)
+        : NCursesForm( nlines, ncols, 2, 2 ){}
+    virtual int virtualize(int c);
+    inline void init_form(NCursesFormField* F[],
+                          bool with_frame,
+                          bool autoDeleteItems)
+    {
+        InitForm(F, with_frame, autoDeleteItems);
+    }
 };
+
 class ImportWalletAction : public NCursesMenuItem
 {
+  private:
+    std::shared_ptr<ImportWalletForm> p_submenu;
+    NCursesFormField** F;
   public:
-    ImportWalletAction(const char *s) : NCursesMenuItem(s) {}
+    ImportWalletAction(const char *s,
+                       const std::shared_ptr<StartupMenu> prev);
     bool action();
 };
 
