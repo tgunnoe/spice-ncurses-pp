@@ -8,6 +8,7 @@ AddressesPanel::AddressesPanel(std::shared_ptr<HD_Wallet> wallet)
     for( int i = 0; i != lines(); ++i ) {
         //whelp std::string to const char* was a goddamn learning
         //experience, c_str doesnt copy
+        //https://stackoverflow.com/questions/1195675/convert-a-char-to-stdstring
         std::string addr = wallet->displayAddress(i);
         char *g = new char[addr.size() + 1];
         std::copy(begin(addr), end(addr), g);
