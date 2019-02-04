@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     try {
         spice::Application spice;
         spice.handleArgs(argc, argv);
+        //res = spice.getSingleton()->run();
         res = spice();
         endwin();
     } catch (const NCursesException *e) {

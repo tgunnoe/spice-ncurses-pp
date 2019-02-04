@@ -1,6 +1,7 @@
 #ifndef SPICE_STARTUP_H
 #define SPICE_STARTUP_H
 
+#include <spice/app.hpp>
 #include <spice/HD_Wallet.hpp>
 #include <vector>
 #include <memory>
@@ -64,50 +65,46 @@ template<class T> class SubMenu : public NCursesMenu
         return p_back;
     }
 };
-
+class NewWalletItem;
+class ImportWalletItem;
 ////////////////////////////////////////////////////////
 // Menus ///////////////////////////////////////////////
 ////////////////////////////////////////////////////////
-class StartupMenu : private ItemsList<NCursesMenuItem>, public NCursesMenu
+class StartupMenu : private ItemsList<NCursesMenuItem>,
+                    public NCursesMenu
 {
   private:
-    std::shared_ptr<StartupMenu> p_menu;
-    std::shared_ptr<HD_Wallet>& p_wallet;
+    //std::shared_ptr<StartupMenu> p_menu;
   public:
-    StartupMenu(std::shared_ptr<HD_Wallet>& wallet);
-    std::shared_ptr<HD_Wallet>& getWalletPtr()
-    {
-        return p_wallet;
-    }
+    StartupMenu();
 };
 
 // I derived this class because I wanted to make
 // derivatives of On_Menu_{Init, Termination}
 // which would not be specific to a submenu template
-class NewWalletMenu : public SubMenu<StartupMenu>
+class NewWalletMenu : private ItemsList<NCursesMenuItem>,
+                      public NCursesMenu
 {
   private:
     std::shared_ptr<NCursesPanel> p_panel;
-    HD_Wallet tryWallet;
+    StartupMenu& prev_;
+    HD_Wallet tryWallet_;
   public:
-    NewWalletMenu(int nlines, int ncols,
-                  const std::shared_ptr<StartupMenu> prev)
-            : SubMenu<StartupMenu>(nlines, ncols, prev){}
+    NewWalletMenu(StartupMenu& prev);
     void On_Menu_Init();
     void On_Menu_Termination();
-    HD_Wallet getTempWallet()
-    {
-        return tryWallet;
+    HD_Wallet getTempWallet() const{
+        return tryWallet_;
     }
 
 };
 class AcceptMenu : private ItemsList<NCursesMenuItem>,
-                   public SubMenu<StartupMenu>
+                   public NCursesMenu
 {
   private:
-    std::shared_ptr<StartupMenu> p_prev_;
+    StartupMenu& prev_;
   public:
-    AcceptMenu(std::shared_ptr<StartupMenu> prev);
+    AcceptMenu(StartupMenu& prev);
     inline int drive(int c) {
         return driver(c);
     }
@@ -117,16 +114,15 @@ class ImportWalletForm : private ItemsList<NCursesFormField>,
                          public NCursesForm
 {
   private:
-    std::shared_ptr<AcceptMenu> p_menu_;
+    AcceptMenu menu_;
     bool isOnButton = false;
   public:
-    ImportWalletForm(int nlines, int ncols,
-                     std::shared_ptr<StartupMenu> prev);
+    ImportWalletForm(StartupMenu& prev);
 
     virtual int virtualize(int c);
 
-    std::shared_ptr<AcceptMenu> getMenu() {
-        return p_menu_;
+    AcceptMenu getMenu() {
+        return menu_;
     }
 };
 
@@ -134,46 +130,43 @@ class ImportWalletForm : private ItemsList<NCursesFormField>,
 ////////////////////////////////////////////////////////
 // Menu Items //////////////////////////////////////////
 ////////////////////////////////////////////////////////
-class NewWalletItem : private ItemsList<NCursesMenuItem>,
-                      public NCursesMenuItem
+class NewWalletItem : public NCursesMenuItem
 {
   private:
-    std::shared_ptr<NewWalletMenu> p_submenu;
+    NewWalletMenu menu_;
+    StartupMenu& prev_;
   public:
-    NewWalletItem(const char* s,
-                  const std::shared_ptr<StartupMenu> prev);
+    NewWalletItem(const char* s, StartupMenu& prev)
+        : NCursesMenuItem(s), menu_(prev), prev_(prev) {}
     bool action();
-
 };
 class ImportWalletItem : public NCursesMenuItem
 {
   private:
-    std::shared_ptr<ImportWalletForm> p_form_;
+    ImportWalletForm form_;
+    StartupMenu& prev_;
   public:
-    ImportWalletItem(const char *s,
-                     const std::shared_ptr<StartupMenu> prev)
-        : NCursesMenuItem(s),
-          p_form_(std::make_shared<ImportWalletForm>(7, 65, prev)){}
+    ImportWalletItem(const char *s, StartupMenu& prev)
+        : NCursesMenuItem(s), form_(prev), prev_(prev){}
     bool action();
 };
 class AcceptItem : public NCursesMenuItem
 {
   private:
-    std::shared_ptr<NewWalletMenu> p_submenu;
+    const NewWalletMenu& menu_;
   public:
-    AcceptItem(const char* s,
-               const std::shared_ptr<NewWalletMenu> prev)
-            : NCursesMenuItem(s), p_submenu(prev) {}
+    AcceptItem(const char* s, const NewWalletMenu& prev)
+        : NCursesMenuItem(s), menu_(prev) {}
     bool action();
 
 };
 class BackItem : public NCursesMenuItem
 {
   private:
-    const std::shared_ptr<StartupMenu> p_prev_;
+    StartupMenu prev_;
   public:
-    BackItem(const std::shared_ptr<StartupMenu>& prev)
-        : NCursesMenuItem("Back"), p_prev_(prev) {}
+    BackItem(StartupMenu& prev)
+        : NCursesMenuItem("Back"), prev_(prev) {}
     bool action();
 };
 class QuitItem : public NCursesMenuItem
