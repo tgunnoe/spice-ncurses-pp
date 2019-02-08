@@ -21,7 +21,7 @@ int Application::run()
 {
     // TODO: Insert here no wallet logic
 
-    StartupMenu M;
+    StartupMenu M(p_wallet_);
     M();
 
     if (p_wallet_ != nullptr) {

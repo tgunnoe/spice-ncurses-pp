@@ -74,14 +74,16 @@ class StartupMenu : private ItemsList<NCursesMenuItem>,
                     public NCursesMenu
 {
   private:
-    //std::shared_ptr<StartupMenu> p_menu;
+    //wallet parameter is nullptr so here p_wallet_
+    // needs to reference the ptr
+    std::shared_ptr<HD_Wallet>& p_wallet_;
   public:
-    StartupMenu();
+    StartupMenu(std::shared_ptr<HD_Wallet>& wallet);
+    std::shared_ptr<HD_Wallet>& getWallet() {
+        return p_wallet_;
+    }
 };
 
-// I derived this class because I wanted to make
-// derivatives of On_Menu_{Init, Termination}
-// which would not be specific to a submenu template
 class NewWalletMenu : private ItemsList<NCursesMenuItem>,
                       public NCursesMenu
 {
@@ -95,6 +97,9 @@ class NewWalletMenu : private ItemsList<NCursesMenuItem>,
     void On_Menu_Termination();
     HD_Wallet getTempWallet() const{
         return tryWallet_;
+    }
+    StartupMenu& prev_menu() const {
+        return prev_;
     }
 
 };
@@ -154,9 +159,9 @@ class ImportWalletItem : public NCursesMenuItem
 class AcceptItem : public NCursesMenuItem
 {
   private:
-    const NewWalletMenu& menu_;
+    NewWalletMenu& menu_;
   public:
-    AcceptItem(const char* s, const NewWalletMenu& prev)
+    AcceptItem(const char* s, NewWalletMenu& prev)
         : NCursesMenuItem(s), menu_(prev) {}
     bool action();
 

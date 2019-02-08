@@ -7,10 +7,10 @@ bool NewWalletItem::action()
 {
     prev_.hide();
     menu_();
-    // if(p_submenu->prev_menu()->getWalletPtr() != nullptr)
-    //     return true;
-    // else
-    return false;
+    if(prev_.getWallet() != nullptr)
+        return true;
+    else
+        return false;
 }
 
 bool ImportWalletItem::action()
@@ -33,16 +33,18 @@ bool BackItem::action()
 bool AcceptItem::action()
 {
     // Fix this crazy spaghetti. almost looks like lisp..
-    //spice::Application::getSingleton()->getWallet() =
-    //    std::make_shared<HD_Wallet>(
-    //    bc::split( menu_.getTempWallet().displayMnemonic()) );
+
+    menu_.prev_menu().getWallet() =
+        std::make_shared<HD_Wallet>(
+            bc::split( menu_.getTempWallet().displayMnemonic()) );
     return true;
 }
 ////////////////////////////////////////////////////////
 // Menus ///////////////////////////////////////////////
 ////////////////////////////////////////////////////////
-StartupMenu::StartupMenu()
-        : NCursesMenu (6, 25, (lines()-5)/2, (cols()-23)/2)
+StartupMenu::StartupMenu(std::shared_ptr<HD_Wallet>& wallet)
+    : NCursesMenu (6, 25, (lines()-5)/2, (cols()-23)/2),
+      p_wallet_(wallet)
 {
     V_.reserve(4U);
     V_ = {
