@@ -17,9 +17,10 @@ bool ImportWalletItem::action()
 {
     //p_form_->getMenu().prev_menu()->hide();
     //p_submenu->prev_menu()->hide();
-    form_.getMenu().boldframe("Wallet mnemonic");
-    form_.getMenu().post();
+
     prev_.hide();
+    form_.box();
+
     form_();
     return true;
 }
@@ -132,6 +133,11 @@ int ImportWalletForm::virtualize(int c)
     // Pass the rest of the keys to predefined handler.
     default: return NCursesForm::virtualize(c);
     }
+}
+void ImportWalletForm::On_Form_Init()
+{
+    menu_.post();
+    menu_.boldframe("Wallet mnemonic");
 }
 void NewWalletMenu::On_Menu_Init()
 {

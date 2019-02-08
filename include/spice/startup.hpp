@@ -118,6 +118,7 @@ class ImportWalletForm : private ItemsList<NCursesFormField>,
     bool isOnButton = false;
   public:
     ImportWalletForm(StartupMenu& prev);
+    void On_Form_Init();
 
     virtual int virtualize(int c);
 
