@@ -6,6 +6,7 @@
 bool NewWalletItem::action()
 {
     prev_.hide();
+    menu_.boldframe("Keep?");
     menu_();
     if(prev_.getWallet() != nullptr)
         return true;
@@ -72,8 +73,6 @@ NewWalletMenu::NewWalletMenu(StartupMenu& prev) :
     };
 
     InitMenu(&V_[0], true, false);
-
-    boldframe("Keep?");
     set_mark(">");
 }
 AcceptMenu::AcceptMenu(StartupMenu& prev) :
