@@ -163,7 +163,7 @@ class AcceptItem : public NCursesMenuItem
 class BackItem : public NCursesMenuItem
 {
   private:
-    StartupMenu prev_;
+    StartupMenu& prev_;
   public:
     BackItem(StartupMenu& prev)
         : NCursesMenuItem("Back"), prev_(prev) {}
