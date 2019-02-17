@@ -65,8 +65,7 @@ template<class T> class SubMenu : public NCursesMenu
         return p_back;
     }
 };
-class NewWalletItem;
-class ImportWalletItem;
+
 ////////////////////////////////////////////////////////
 // Menus ///////////////////////////////////////////////
 ////////////////////////////////////////////////////////
@@ -103,35 +102,42 @@ class NewWalletMenu : private ItemsList<NCursesMenuItem>,
     }
 
 };
+
+class FormPanel;
+
 class AcceptMenu : private ItemsList<NCursesMenuItem>,
                    public NCursesMenu
 {
   private:
-    StartupMenu& prev_;
   public:
-    AcceptMenu(StartupMenu& prev);
-    inline int drive(int c) {
-        return driver(c);
-    }
-    bool action();
+    AcceptMenu();
 };
 class ImportWalletForm : private ItemsList<NCursesFormField>,
                          public NCursesForm
 {
   private:
-    AcceptMenu menu_;
-    bool isOnButton = false;
   public:
-    ImportWalletForm(StartupMenu& prev);
+    ImportWalletForm();
     void On_Form_Init();
-
     virtual int virtualize(int c);
-
+};
+class FormPanel : public NCursesPanel
+{
+  private:
+    ImportWalletForm form_;
+    AcceptMenu menu_;
+    //StartupMenu& prev_;
+    bool isOnMenu = false;
+  public:
+    FormPanel();
     AcceptMenu getMenu() {
         return menu_;
     }
-};
+    ImportWalletForm getForm() {
+        return form_;
+    }
 
+};
 
 ////////////////////////////////////////////////////////
 // Menu Items //////////////////////////////////////////
@@ -149,11 +155,10 @@ class NewWalletItem : public NCursesMenuItem
 class ImportWalletItem : public NCursesMenuItem
 {
   private:
-    ImportWalletForm form_;
     StartupMenu& prev_;
   public:
     ImportWalletItem(const char *s, StartupMenu& prev)
-        : NCursesMenuItem(s), form_(prev), prev_(prev){}
+        : NCursesMenuItem(s), prev_(prev){}
     bool action();
 };
 class AcceptItem : public NCursesMenuItem
@@ -191,7 +196,5 @@ class PassiveItem : public NCursesMenuItem
         options_off(O_SELECTABLE);
     }
 };
-
-
 
 #endif
