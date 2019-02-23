@@ -17,7 +17,11 @@ I'm going to migrate this wallet name to my new QT wallet and rename this spice-
 
 
 Here's the only resources I could find that were only somewhat helpful.
+
 https://reversed.top/2016-04-24/ncurses-for-cpp/
+
 https://fossies.org/dox/ncurses-6.1/dir_b2bca091c87127f5da307455ce418719.html
+
 https://github.com/gtorrent/gtorrent-ncurses
+
 https://alan-mushi.github.io/2015/05/26/simple-ncurses-popup-in-C.html
