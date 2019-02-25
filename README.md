@@ -1,7 +1,7 @@
 Fuck this project.
 
 
-I'll come back to it when I'm a c++ god.
+I'll come back to it when I have time and better understanding of ncurses
 
 
 The native ncurses c++ wrappers are undocumented and hard to use, especially if
