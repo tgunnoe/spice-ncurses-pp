@@ -1,7 +1,4 @@
-Fuck this project.
-
-
-I'll come back to it when I have time and better understanding of ncurses
+Archived project
 
 
 The native ncurses c++ wrappers are undocumented and hard to use, especially if
